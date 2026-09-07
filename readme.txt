@@ -4,7 +4,7 @@ Tags: email, newsletter, aws, ses, bulk email, deliverability, bounce handling
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,16 @@ Only if you tick "Delete all data" in Settings first. Deactivation never
 touches your data.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed the GitHub updater handing WordPress a download URL that returns 404
+  on a private repository. Private release assets are only served from the API
+  asset endpoint, and only for requests that ask for
+  Accept: application/octet-stream.
+* The Authorization header is now scoped to api.github.com alone, so it is
+  never attached to the pre-signed redirect target that serves the actual file.
+* Settings now explains why an update check failed, distinguishing a private
+  repository with no token from a token that is no longer valid.
 
 = 1.0.0 =
 * Initial release.
