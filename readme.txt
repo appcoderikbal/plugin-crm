@@ -4,7 +4,7 @@ Tags: email, newsletter, aws, ses, bulk email, deliverability, bounce handling
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,18 @@ Only if you tick "Delete all data" in Settings first. Deactivation never
 touches your data.
 
 == Changelog ==
+
+= 1.0.2 =
+* Added the missing AWS regions. The region list went from 13 entries to 30 and
+  now includes Europe (Stockholm), Paris, Zurich, Milan, Spain, Seoul, Osaka,
+  Jakarta, Melbourne, Hong Kong, Hyderabad, Cape Town, Bahrain, UAE, Tel Aviv
+  and GovCloud.
+* The region field is now a searchable input rather than a fixed dropdown, so a
+  region AWS launches in future can be entered without waiting for a plugin
+  update.
+* A malformed region is now rejected outright instead of having stray
+  characters stripped out of it. The old behaviour silently turned a typo into
+  a plausible-looking but wrong SES endpoint.
 
 = 1.0.1 =
 * Fixed the GitHub updater handing WordPress a download URL that returns 404

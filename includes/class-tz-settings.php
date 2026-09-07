@@ -44,6 +44,66 @@ class TZ_Settings {
 	}
 
 	/**
+	 * AWS regions where Amazon SES is available.
+	 *
+	 * Used to populate the suggestion list on the Settings screen. It is a
+	 * convenience list, not a whitelist: AWS adds regions regularly, so the
+	 * field accepts any correctly shaped region code and this list only drives
+	 * autocomplete.
+	 *
+	 * @return array<string,string> Map of region code => human label.
+	 */
+	public static function regions() {
+		return array(
+			'us-east-1'      => 'US East (N. Virginia)',
+			'us-east-2'      => 'US East (Ohio)',
+			'us-west-1'      => 'US West (N. California)',
+			'us-west-2'      => 'US West (Oregon)',
+			'ca-central-1'   => 'Canada (Central)',
+			'sa-east-1'      => 'South America (Sao Paulo)',
+			'eu-west-1'      => 'Europe (Ireland)',
+			'eu-west-2'      => 'Europe (London)',
+			'eu-west-3'      => 'Europe (Paris)',
+			'eu-central-1'   => 'Europe (Frankfurt)',
+			'eu-central-2'   => 'Europe (Zurich)',
+			'eu-north-1'     => 'Europe (Stockholm)',
+			'eu-south-1'     => 'Europe (Milan)',
+			'eu-south-2'     => 'Europe (Spain)',
+			'il-central-1'   => 'Israel (Tel Aviv)',
+			'me-south-1'     => 'Middle East (Bahrain)',
+			'me-central-1'   => 'Middle East (UAE)',
+			'af-south-1'     => 'Africa (Cape Town)',
+			'ap-east-1'      => 'Asia Pacific (Hong Kong)',
+			'ap-south-1'     => 'Asia Pacific (Mumbai)',
+			'ap-south-2'     => 'Asia Pacific (Hyderabad)',
+			'ap-northeast-1' => 'Asia Pacific (Tokyo)',
+			'ap-northeast-2' => 'Asia Pacific (Seoul)',
+			'ap-northeast-3' => 'Asia Pacific (Osaka)',
+			'ap-southeast-1' => 'Asia Pacific (Singapore)',
+			'ap-southeast-2' => 'Asia Pacific (Sydney)',
+			'ap-southeast-3' => 'Asia Pacific (Jakarta)',
+			'ap-southeast-4' => 'Asia Pacific (Melbourne)',
+			'us-gov-east-1'  => 'AWS GovCloud (US-East)',
+			'us-gov-west-1'  => 'AWS GovCloud (US-West)',
+		);
+	}
+
+	/**
+	 * Whether a string is shaped like an AWS region code.
+	 *
+	 * Deliberately validates the shape rather than membership of the list
+	 * above, so a region AWS launches tomorrow works without a plugin update.
+	 * Matches us-east-1, eu-north-1, ap-southeast-4, me-central-1 and
+	 * us-gov-west-1 alike.
+	 *
+	 * @param string $region Candidate region code.
+	 * @return bool
+	 */
+	public static function is_valid_region( $region ) {
+		return (bool) preg_match( '/^[a-z]{2}(?:-[a-z]+){1,2}-[0-9]{1,2}$/', (string) $region );
+	}
+
+	/**
 	 * Fetch the full settings array, merged over defaults.
 	 *
 	 * @param bool $refresh Bypass the request cache.
@@ -119,10 +179,19 @@ class TZ_Settings {
 			$out['aws_secret_key'] = sanitize_text_field( $submitted_secret );
 		}
 
-		// AWS regions are lowercase alphanumerics and hyphens only.
-		$region            = isset( $raw['aws_region'] ) ? strtolower( sanitize_text_field( $raw['aws_region'] ) ) : '';
-		$region            = preg_replace( '/[^a-z0-9\-]/', '', $region );
-		$out['aws_region'] = '' !== $region ? $region : 'us-east-1';
+		/*
+		 * Region codes are lowercase letters, digits and hyphens. Rather than
+		 * stripping stray characters - which silently turns a typo into a
+		 * plausible-looking but wrong endpoint - anything not shaped like a
+		 * region is rejected and the previous value is kept.
+		 */
+		$region = isset( $raw['aws_region'] ) ? strtolower( trim( sanitize_text_field( $raw['aws_region'] ) ) ) : '';
+
+		if ( self::is_valid_region( $region ) ) {
+			$out['aws_region'] = $region;
+		} else {
+			$out['aws_region'] = self::is_valid_region( $current['aws_region'] ) ? $current['aws_region'] : 'us-east-1';
+		}
 
 		// --- Sender identity ---
 		$out['from_name'] = isset( $raw['from_name'] )

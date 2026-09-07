@@ -17,21 +17,7 @@ defined( 'ABSPATH' ) || exit;
 
 $tz_has_secret = ( '' !== $settings['aws_secret_key'] );
 $tz_has_token  = ( '' !== $settings['github_token'] );
-$tz_regions    = array(
-	'us-east-1'      => 'US East (N. Virginia)',
-	'us-east-2'      => 'US East (Ohio)',
-	'us-west-1'      => 'US West (N. California)',
-	'us-west-2'      => 'US West (Oregon)',
-	'eu-west-1'      => 'Europe (Ireland)',
-	'eu-west-2'      => 'Europe (London)',
-	'eu-central-1'   => 'Europe (Frankfurt)',
-	'ap-south-1'     => 'Asia Pacific (Mumbai)',
-	'ap-southeast-1' => 'Asia Pacific (Singapore)',
-	'ap-southeast-2' => 'Asia Pacific (Sydney)',
-	'ap-northeast-1' => 'Asia Pacific (Tokyo)',
-	'ca-central-1'   => 'Canada (Central)',
-	'sa-east-1'      => 'South America (Sao Paulo)',
-);
+$tz_regions    = TZ_Settings::regions();
 ?>
 <div class="wrap tz-wrap">
 
@@ -85,23 +71,30 @@ $tz_regions    = array(
 					<tr>
 						<th scope="row"><label for="tz_aws_region"><?php esc_html_e( 'AWS Region', 'tz-mailer' ); ?></label></th>
 						<td>
-							<select id="tz_aws_region" name="aws_region">
+							<input type="text"
+								id="tz_aws_region"
+								name="aws_region"
+								class="regular-text code"
+								list="tz_region_list"
+								autocomplete="off"
+								spellcheck="false"
+								value="<?php echo esc_attr( $settings['aws_region'] ); ?>" />
+
+							<datalist id="tz_region_list">
 								<?php foreach ( $tz_regions as $tz_code => $tz_name ) : ?>
-									<option value="<?php echo esc_attr( $tz_code ); ?>" <?php selected( $settings['aws_region'], $tz_code ); ?>>
-										<?php echo esc_html( $tz_code . ' - ' . $tz_name ); ?>
+									<option value="<?php echo esc_attr( $tz_code ); ?>">
+										<?php echo esc_attr( $tz_name ); ?>
 									</option>
 								<?php endforeach; ?>
-								<?php if ( ! isset( $tz_regions[ $settings['aws_region'] ] ) ) : ?>
-									<option value="<?php echo esc_attr( $settings['aws_region'] ); ?>" selected="selected">
-										<?php echo esc_html( $settings['aws_region'] ); ?>
-									</option>
-								<?php endif; ?>
-							</select>
+							</datalist>
 							<p class="description">
 								<?php
 								printf(
-									/* translators: %s: SES endpoint URL */
-									esc_html__( 'Endpoint: %s', 'tz-mailer' ),
+									/* translators: 1: region label, 2: SES endpoint URL */
+									esc_html__( 'Start typing to search, or enter any region code. %1$s Currently sending through %2$s', 'tz-mailer' ),
+									isset( $tz_regions[ $settings['aws_region'] ] )
+										? '<strong>' . esc_html( $tz_regions[ $settings['aws_region'] ] ) . '</strong>.'
+										: '',
 									'<code>' . esc_html( TZ_SES::endpoint( $settings['aws_region'] ) ) . '</code>'
 								);
 								?>
