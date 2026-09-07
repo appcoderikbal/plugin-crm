@@ -436,7 +436,8 @@ $tz_regions    = array(
 									<?php esc_html_e( 'release notes', 'tz-mailer' ); ?>
 								</a>
 							<?php else : ?>
-								<em><?php esc_html_e( 'Could not reach the GitHub API. Results are cached for 30 minutes after a failure.', 'tz-mailer' ); ?></em>
+								<em><?php echo esc_html( $update['hint'] ); ?></em>
+								<br /><span class="description"><?php esc_html_e( 'Failed checks are cached for 30 minutes to protect the API rate limit. Use "Check for updates" on the Plugins screen to retry immediately.', 'tz-mailer' ); ?></span>
 							<?php endif; ?>
 						</td>
 					</tr>

@@ -138,7 +138,7 @@ class TZ_Updater {
 		$item->plugin        = $this->basename;
 		$item->new_version   = $release['version'];
 		$item->url           = 'https://github.com/' . self::REPO;
-		$item->package       = $release['package'];
+		$item->package       = $this->resolve_package( $release );
 		$item->tested        = $release['tested'];
 		$item->requires_php  = $release['requires_php'];
 		$item->requires      = $release['requires'];
@@ -180,8 +180,9 @@ class TZ_Updater {
 		$info->version        = $release['version'];
 		$info->author         = '<a href="https://techzapp.com/">Techzapp</a>';
 		$info->homepage       = 'https://github.com/' . self::REPO;
-		$info->download_link  = $release['package'];
-		$info->trunk          = $release['package'];
+		$package              = $this->resolve_package( $release );
+		$info->download_link  = $package;
+		$info->trunk          = $package;
 		$info->requires       = $release['requires'];
 		$info->requires_php   = $release['requires_php'];
 		$info->tested         = $release['tested'];
@@ -271,15 +272,17 @@ class TZ_Updater {
 	 * @return array
 	 */
 	public function authorize_request( $args, $url ) {
-		$token = trim( (string) TZ_Settings::get( 'github_token', '' ) );
-
-		if ( '' === $token ) {
-			return $args;
-		}
-
 		$host = wp_parse_url( $url, PHP_URL_HOST );
 
-		if ( ! in_array( $host, array( 'api.github.com', 'codeload.github.com', 'objects.githubusercontent.com' ), true ) ) {
+		/*
+		 * Scoped deliberately to api.github.com alone. When an asset download
+		 * redirects to objects.githubusercontent.com the target is a pre-signed
+		 * URL that carries its own credentials, and sending an Authorization
+		 * header alongside it makes the request fail outright. cURL already
+		 * drops the header on cross-host redirects, so the correct thing is to
+		 * never attach it beyond the API host in the first place.
+		 */
+		if ( 'api.github.com' !== $host ) {
 			return $args;
 		}
 
@@ -287,7 +290,18 @@ class TZ_Updater {
 			$args['headers'] = array();
 		}
 
-		$args['headers']['Authorization'] = 'Bearer ' . $token;
+		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+
+		// An asset URL must ask for the binary; the default returns JSON metadata.
+		if ( false !== strpos( $path, '/releases/assets/' ) ) {
+			$args['headers']['Accept'] = 'application/octet-stream';
+		}
+
+		$token = trim( (string) TZ_Settings::get( 'github_token', '' ) );
+
+		if ( '' !== $token ) {
+			$args['headers']['Authorization'] = 'Bearer ' . $token;
+		}
 
 		return $args;
 	}
@@ -397,7 +411,7 @@ class TZ_Updater {
 			'body'         => isset( $body['body'] ) ? (string) $body['body'] : '',
 			'html_url'     => isset( $body['html_url'] ) ? esc_url_raw( $body['html_url'] ) : '',
 			'published_at' => isset( $body['published_at'] ) ? (string) $body['published_at'] : '',
-			'package'      => $this->pick_package( $body ),
+			'packages'     => $this->collect_packages( $body ),
 			'requires'     => '5.8',
 			'requires_php' => '7.4',
 			'tested'       => '6.6',
@@ -405,32 +419,72 @@ class TZ_Updater {
 	}
 
 	/**
-	 * Choose the archive WordPress should download.
+	 * Collect every candidate download URL from a release.
 	 *
-	 * A purpose-built release asset is strongly preferred: it contains only
-	 * shipping files, already inside a correctly named folder. The source
-	 * zipball is the fallback so updates still work if someone tags a release
-	 * by hand without running the build workflow.
+	 * All three are cached rather than pre-resolving one, because which URL is
+	 * correct depends on whether a token is configured, and that can change
+	 * after the release has already been cached.
 	 *
 	 * @param array $body Decoded API response.
-	 * @return string Download URL.
+	 * @return array{asset_api:string,asset_browser:string,zipball:string}
 	 */
-	private function pick_package( array $body ) {
+	private function collect_packages( array $body ) {
 		$wanted = $this->slug . '.zip';
 
-		if ( ! empty( $body['assets'] ) && is_array( $body['assets'] ) ) {
-			foreach ( $body['assets'] as $asset ) {
-				if ( ! isset( $asset['name'], $asset['browser_download_url'] ) ) {
-					continue;
-				}
+		$out = array(
+			'asset_api'     => '',
+			'asset_browser' => '',
+			'zipball'       => isset( $body['zipball_url'] ) ? esc_url_raw( $body['zipball_url'] ) : '',
+		);
 
-				if ( strtolower( $asset['name'] ) === strtolower( $wanted ) ) {
-					return esc_url_raw( $asset['browser_download_url'] );
-				}
-			}
+		if ( empty( $body['assets'] ) || ! is_array( $body['assets'] ) ) {
+			return $out;
 		}
 
-		return isset( $body['zipball_url'] ) ? esc_url_raw( $body['zipball_url'] ) : '';
+		foreach ( $body['assets'] as $asset ) {
+			if ( ! isset( $asset['name'] ) || strtolower( $asset['name'] ) !== strtolower( $wanted ) ) {
+				continue;
+			}
+
+			if ( isset( $asset['url'] ) ) {
+				$out['asset_api'] = esc_url_raw( $asset['url'] );
+			}
+
+			if ( isset( $asset['browser_download_url'] ) ) {
+				$out['asset_browser'] = esc_url_raw( $asset['browser_download_url'] );
+			}
+
+			break;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Decide which URL WordPress should actually download.
+	 *
+	 * On a private repository the public browser_download_url returns 404 no
+	 * matter what credentials are supplied; only the API asset endpoint works,
+	 * and only with Accept: application/octet-stream. On a public repository
+	 * the browser URL is preferable because it needs no credentials at all.
+	 *
+	 * @param array $release Normalized release data.
+	 * @return string
+	 */
+	private function resolve_package( array $release ) {
+		$packages = isset( $release['packages'] ) ? $release['packages'] : array();
+
+		$has_token = ( '' !== trim( (string) TZ_Settings::get( 'github_token', '' ) ) );
+
+		if ( $has_token && ! empty( $packages['asset_api'] ) ) {
+			return $packages['asset_api'];
+		}
+
+		if ( ! empty( $packages['asset_browser'] ) ) {
+			return $packages['asset_browser'];
+		}
+
+		return isset( $packages['zipball'] ) ? $packages['zipball'] : '';
 	}
 
 	/**
@@ -526,10 +580,20 @@ class TZ_Updater {
 	/**
 	 * Current update status, for the Settings screen.
 	 *
-	 * @return array{current:string,latest:string,available:bool,url:string,checked:bool}
+	 * @return array{current:string,latest:string,available:bool,url:string,checked:bool,has_token:bool,hint:string}
 	 */
 	public function status() {
 		$release = $this->get_release();
+
+		$has_token = ( '' !== trim( (string) TZ_Settings::get( 'github_token', '' ) ) );
+
+		$hint = '';
+
+		if ( ! $release ) {
+			$hint = $has_token
+				? __( 'GitHub returned an error. Check that the token is valid and still has read access to the repository.', 'tz-mailer' )
+				: __( 'No release was found. If the repository is private, update checks require a GitHub token with read access below.', 'tz-mailer' );
+		}
 
 		return array(
 			'current'   => TZ_MAILER_VERSION,
@@ -537,6 +601,8 @@ class TZ_Updater {
 			'available' => (bool) ( $release && version_compare( $release['version'], TZ_MAILER_VERSION, '>' ) ),
 			'url'       => $release ? $release['html_url'] : 'https://github.com/' . self::REPO . '/releases',
 			'checked'   => (bool) $release,
+			'has_token' => $has_token,
+			'hint'      => $hint,
 		);
 	}
 
