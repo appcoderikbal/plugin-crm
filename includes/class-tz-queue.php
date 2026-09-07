@@ -53,6 +53,27 @@ class TZ_Queue {
 	 * @return array Run report (also returned for manual "Send now" triggers).
 	 */
 	public function run() {
+		$report = $this->execute();
+
+		/*
+		 * Record the outcome of every run, including the ones that did nothing.
+		 * A worker that silently returns "no active campaign" twelve times an
+		 * hour is indistinguishable from a broken cron unless the reason is
+		 * written down somewhere the operator can see it.
+		 */
+		$report['ran_at'] = time();
+
+		update_option( 'tz_last_run', $report, false );
+
+		return $report;
+	}
+
+	/**
+	 * Perform the run. Wrapped by run() so the outcome is always recorded.
+	 *
+	 * @return array Run report.
+	 */
+	private function execute() {
 		$report = array(
 			'processed' => 0,
 			'sent'      => 0,
@@ -324,6 +345,54 @@ class TZ_Queue {
 			'result' => 'failed',
 			'fatal'  => TZ_SES::is_account_level_failure( $result['error_code'] ),
 		);
+	}
+
+	/**
+	 * Outcome of the most recent worker run.
+	 *
+	 * @return array|null Report with a ran_at timestamp, or null if never run.
+	 */
+	public static function last_run() {
+		$report = get_option( 'tz_last_run', null );
+
+		return is_array( $report ) ? $report : null;
+	}
+
+	/**
+	 * Why sending is currently blocked, if it is.
+	 *
+	 * Returns the first blocking condition in the order the worker would hit
+	 * it, so the dashboard can tell an operator exactly what to fix next
+	 * instead of leaving them to infer it from an inert queue.
+	 *
+	 * @return string Empty string when nothing is blocking.
+	 */
+	public static function blocker() {
+		if ( TZ_Circuit_Breaker::is_halted() ) {
+			return __( 'The circuit breaker is halted. Clear it in Settings before sending can resume.', 'tz-mailer' );
+		}
+
+		if ( ! TZ_Settings::is_configured() ) {
+			return __( 'AWS SES is not fully configured. Add the missing credentials in Settings.', 'tz-mailer' );
+		}
+
+		$campaign = TZ_Campaigns::get_active();
+
+		if ( ! $campaign ) {
+			return __( 'No campaign is active. Nothing will send until you activate one in the Campaign Composer, however many contacts are queued.', 'tz-mailer' );
+		}
+
+		if ( ! TZ_Shortcodes::has_unsubscribe_tag( $campaign['body_html'] ) ) {
+			return __( 'The active campaign has no {unsubscribe_url} tag, so it cannot be sent.', 'tz-mailer' );
+		}
+
+		$counts = TZ_DB::status_counts();
+
+		if ( (int) $counts['queued'] < 1 ) {
+			return __( 'The queue is empty. Import contacts or requeue existing ones.', 'tz-mailer' );
+		}
+
+		return '';
 	}
 
 	/**

@@ -3,7 +3,7 @@
  * Plugin Name:       Techzapp Mailer
  * Plugin URI:        https://techzapp.com/
  * Description:       Production-grade bulk mailer for WordPress built directly on the AWS SES v2 API (native SigV4, no AWS SDK). Includes CSV import, HTML campaign composer, throttled cron queue worker, SNS bounce/complaint webhook, RFC 8058 one-click unsubscribe and a hard 2.0% bounce-rate circuit breaker.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            Techzapp
@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * Constants
  * ---------------------------------------------------------------------- */
 
-define( 'TZ_MAILER_VERSION', '1.0.3' );
+define( 'TZ_MAILER_VERSION', '1.0.4' );
 define( 'TZ_MAILER_FILE', __FILE__ );
 define( 'TZ_MAILER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'TZ_MAILER_URL', plugin_dir_url( __FILE__ ) );

@@ -11,6 +11,8 @@
  * @var int|false  $next_run   Next cron timestamp.
  * @var int        $total      Total subscribers.
  * @var array      $recent     Recent log rows.
+ * @var string     $blocker    Why sending is paused, or ''.
+ * @var array|null $last_run   Outcome of the most recent worker run.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -63,6 +65,20 @@ $tz_datetime = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 			?>
 		</div>
 	</div>
+
+	<?php if ( '' !== $blocker ) : ?>
+		<div class="tz-callout tz-callout--warning">
+			<p class="tz-callout__title"><?php esc_html_e( 'Sending is paused', 'tz-mailer' ); ?></p>
+			<p><?php echo esc_html( $blocker ); ?></p>
+			<?php if ( ! $campaign ) : ?>
+				<p>
+					<a class="button button-primary" href="<?php echo esc_url( TZ_Admin::url( '-composer' ) ); ?>">
+						<?php esc_html_e( 'Go to Campaign Composer', 'tz-mailer' ); ?>
+					</a>
+				</p>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 	<!-- KPI cards -->
 	<div class="tz-cards">
@@ -172,6 +188,26 @@ $tz_datetime = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 						</td>
 					</tr>
 					<tr>
+						<th scope="row"><?php esc_html_e( 'Last run', 'tz-mailer' ); ?></th>
+						<td>
+							<?php if ( $last_run && ! empty( $last_run['ran_at'] ) ) : ?>
+								<?php
+								printf(
+									/* translators: 1: relative time, 2: sent count */
+									esc_html__( '%1$s ago, %2$s sent.', 'tz-mailer' ),
+									esc_html( human_time_diff( (int) $last_run['ran_at'], time() ) ),
+									esc_html( number_format_i18n( isset( $last_run['sent'] ) ? $last_run['sent'] : 0 ) )
+								);
+								?>
+								<?php if ( ! empty( $last_run['reason'] ) ) : ?>
+									<br /><span class="tz-muted"><?php echo esc_html( $last_run['reason'] ); ?></span>
+								<?php endif; ?>
+							<?php else : ?>
+								<em><?php esc_html_e( 'The worker has not run yet.', 'tz-mailer' ); ?></em>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<tr>
 						<th scope="row"><?php esc_html_e( 'Next scheduled run', 'tz-mailer' ); ?></th>
 						<td>
 							<?php
@@ -216,7 +252,13 @@ $tz_datetime = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 						<?php esc_html_e( 'Run one batch now', 'tz-mailer' ); ?>
 					</button>
 					<span class="description">
-						<?php esc_html_e( 'Processes a single micro-batch immediately instead of waiting for cron.', 'tz-mailer' ); ?>
+						<?php
+						if ( '' !== $blocker ) {
+							echo esc_html( $blocker );
+						} else {
+							esc_html_e( 'Processes a single micro-batch immediately instead of waiting for cron.', 'tz-mailer' );
+						}
+						?>
 					</span>
 				</form>
 			</div>

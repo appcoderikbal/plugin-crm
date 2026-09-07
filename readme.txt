@@ -4,7 +4,7 @@ Tags: email, newsletter, aws, ses, bulk email, deliverability, bounce handling
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,15 @@ Only if you tick "Delete all data" in Settings first. Deactivation never
 touches your data.
 
 == Changelog ==
+
+= 1.0.4 =
+* The Dashboard now says why sending is paused instead of leaving an inert
+  queue to be interpreted. A queue that will never drain because no campaign
+  is active now says exactly that, with a link to fix it.
+* Added a "Last run" row showing when the worker last ran and what it did, so
+  a cron tick that deliberately did nothing is distinguishable from a cron
+  that is not firing at all.
+* The disabled "Run one batch now" button now explains why it is disabled.
 
 = 1.0.3 =
 * Default region is now Europe (Stockholm), eu-north-1, matching where this

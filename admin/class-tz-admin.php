@@ -714,6 +714,8 @@ class TZ_Admin {
 				'next_run'   => TZ_Queue::next_run(),
 				'total'      => TZ_DB::total_subscribers(),
 				'recent'     => TZ_Logger::query( '', '', 8, 0 ),
+				'blocker'    => TZ_Queue::blocker(),
+				'last_run'   => TZ_Queue::last_run(),
 			)
 		);
 	}
