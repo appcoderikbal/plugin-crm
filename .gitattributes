@@ -1,0 +1,17 @@
+# Normalize everything to LF in the repository and on checkout. WordPress
+# plugin files should never ship with CRLF, and the release zip is built on
+# Linux where CRLF in a PHP file is merely ugly but in a shell script is fatal.
+* text=auto eol=lf
+
+# Binary assets, if any are ever added.
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
+*.woff binary
+*.woff2 binary
+
+# Keep development scaffolding out of the release archive.
+/.github        export-ignore
+/.gitattributes export-ignore
+/.gitignore     export-ignore

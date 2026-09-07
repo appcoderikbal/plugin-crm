@@ -1,0 +1,538 @@
+/**
+ * Techzapp Mailer admin styles.
+ *
+ * Deliberately scoped under .tz-wrap (plus the global breaker banner) so
+ * nothing here can leak into core screens or another plugin's UI.
+ */
+
+/* -------------------------------------------------------------------------
+ * Circuit breaker banner (global, appears on every admin screen)
+ * ---------------------------------------------------------------------- */
+
+.tz-breaker-banner {
+	border-left: 6px solid #b32d2e;
+	background: #fcf0f1;
+	padding: 14px 16px;
+	margin: 16px 0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.tz-breaker-title {
+	font-size: 15px;
+	font-weight: 700;
+	color: #8a1f1f;
+	margin: 0 0 8px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.tz-breaker-icon {
+	font-size: 20px;
+	line-height: 1;
+}
+
+.tz-breaker-banner p {
+	margin: 0 0 8px;
+}
+
+.tz-breaker-meta {
+	color: #7a2020;
+	font-size: 12px;
+}
+
+/* -------------------------------------------------------------------------
+ * Layout
+ * ---------------------------------------------------------------------- */
+
+.tz-wrap {
+	max-width: 1180px;
+}
+
+.tz-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.tz-title__version {
+	font-size: 12px;
+	font-weight: 400;
+	color: #787c82;
+	background: #f0f0f1;
+	border-radius: 10px;
+	padding: 2px 8px;
+}
+
+.tz-subtitle {
+	color: #50575e;
+	font-size: 14px;
+	max-width: 820px;
+	margin: 4px 0 18px;
+}
+
+.tz-subheading {
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #646970;
+	margin: 20px 0 8px;
+}
+
+.tz-columns {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+	gap: 18px;
+	align-items: start;
+}
+
+.tz-composer {
+	display: grid;
+	grid-template-columns: minmax(0, 2.1fr) minmax(300px, 1fr);
+	gap: 18px;
+	align-items: start;
+}
+
+@media screen and (max-width: 1100px) {
+	.tz-composer {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* -------------------------------------------------------------------------
+ * Panels
+ * ---------------------------------------------------------------------- */
+
+.tz-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	padding: 18px 20px;
+	margin: 0 0 18px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tz-panel--danger {
+	border-color: #d9a0a1;
+	background: #fdf7f7;
+}
+
+.tz-panel--compliance {
+	border-left: 4px solid #2271b1;
+}
+
+.tz-panel__title {
+	font-size: 15px;
+	margin: 0 0 14px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #f0f0f1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.tz-panel__more {
+	margin-left: auto;
+	font-size: 12px;
+	font-weight: 400;
+	text-decoration: none;
+}
+
+.tz-panel__actions {
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.tz-panel__actions .description {
+	display: block;
+	margin-top: 6px;
+}
+
+/* -------------------------------------------------------------------------
+ * KPI cards
+ * ---------------------------------------------------------------------- */
+
+.tz-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+	gap: 14px;
+	margin: 0 0 20px;
+}
+
+.tz-card {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-top: 3px solid #c3c4c7;
+	border-radius: 6px;
+	padding: 16px 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tz-card--success { border-top-color: #0f8a4d; }
+.tz-card--info    { border-top-color: #2271b1; }
+.tz-card--warning { border-top-color: #dba617; }
+.tz-card--danger  { border-top-color: #d63638; }
+.tz-card--critical{ border-top-color: #8a1f1f; }
+.tz-card--neutral { border-top-color: #c3c4c7; }
+
+.tz-card__label {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #646970;
+}
+
+.tz-card__value {
+	font-size: 30px;
+	font-weight: 700;
+	line-height: 1.1;
+	color: #1d2327;
+}
+
+.tz-card__sub {
+	font-size: 12px;
+	color: #646970;
+	line-height: 1.4;
+}
+
+.tz-card__link {
+	font-size: 12px;
+	margin-top: 4px;
+	text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Status strip
+ * ---------------------------------------------------------------------- */
+
+.tz-status-strip {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	flex-wrap: wrap;
+	padding: 12px 18px;
+	border-radius: 6px;
+	margin: 0 0 18px;
+	border: 1px solid #dcdcde;
+	background: #fff;
+	border-left-width: 5px;
+}
+
+.tz-status-strip--success  { border-left-color: #0f8a4d; }
+.tz-status-strip--warning  { border-left-color: #dba617; background: #fdf9ec; }
+.tz-status-strip--critical { border-left-color: #b32d2e; background: #fcf0f1; }
+
+.tz-status-strip__main {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.tz-status-strip__label {
+	font-size: 12px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #50575e;
+}
+
+.tz-status-strip__detail {
+	font-size: 13px;
+	color: #50575e;
+}
+
+/* -------------------------------------------------------------------------
+ * Badges
+ * ---------------------------------------------------------------------- */
+
+.tz-badge {
+	display: inline-block;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.6;
+	letter-spacing: 0.03em;
+	padding: 1px 9px;
+	border-radius: 10px;
+	white-space: nowrap;
+	border: 1px solid transparent;
+}
+
+.tz-badge--success  { background: #e6f4ec; color: #0a6b3c; border-color: #b5e0c8; }
+.tz-badge--info     { background: #e9f1f8; color: #1a5a8a; border-color: #bcd7ec; }
+.tz-badge--warning  { background: #fdf5e3; color: #8a6100; border-color: #efd9a3; }
+.tz-badge--danger   { background: #fbeaea; color: #a02224; border-color: #f0c0c1; }
+.tz-badge--critical { background: #8a1f1f; color: #fff; border-color: #8a1f1f; }
+.tz-badge--neutral  { background: #f0f0f1; color: #50575e; border-color: #dcdcde; }
+
+/* -------------------------------------------------------------------------
+ * Tables
+ * ---------------------------------------------------------------------- */
+
+.tz-table {
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.tz-table th {
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: #50575e;
+}
+
+.tz-table td {
+	vertical-align: top;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.tz-col-time {
+	width: 160px;
+	white-space: nowrap;
+	color: #646970;
+	font-size: 12px;
+}
+
+.tz-col-email {
+	width: 230px;
+	word-break: break-all;
+}
+
+.tz-col-event {
+	width: 170px;
+}
+
+.tz-detail {
+	font-size: 13px;
+	color: #50575e;
+	line-height: 1.5;
+	word-break: break-word;
+}
+
+.tz-kv {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.tz-kv th {
+	text-align: left;
+	font-weight: 600;
+	font-size: 13px;
+	color: #50575e;
+	padding: 8px 12px 8px 0;
+	width: 190px;
+	vertical-align: top;
+}
+
+.tz-kv td {
+	padding: 8px 0;
+	font-size: 13px;
+	vertical-align: top;
+}
+
+.tz-kv tr + tr th,
+.tz-kv tr + tr td {
+	border-top: 1px solid #f0f0f1;
+}
+
+.tz-kv-inline {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	padding: 8px 0;
+	border-bottom: 1px solid #f0f0f1;
+	font-size: 13px;
+}
+
+.tz-muted {
+	color: #8c8f94;
+	font-size: 12px;
+}
+
+.tz-empty {
+	color: #646970;
+	font-style: italic;
+	padding: 18px 0;
+	text-align: center;
+}
+
+.tz-text-danger {
+	color: #b32d2e;
+}
+
+/* -------------------------------------------------------------------------
+ * Filters and pagination
+ * ---------------------------------------------------------------------- */
+
+.tz-filters {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin: 0 0 14px;
+	padding: 12px 14px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+}
+
+.tz-filters__search {
+	min-width: 280px;
+}
+
+.tz-filters__count {
+	margin-left: auto;
+	font-size: 12px;
+	color: #646970;
+}
+
+.tz-pagination {
+	margin: 14px 0 20px;
+}
+
+.tz-pagination .tablenav-pages {
+	float: none;
+	text-align: right;
+}
+
+/* -------------------------------------------------------------------------
+ * Callouts, lists and misc
+ * ---------------------------------------------------------------------- */
+
+.tz-callout {
+	border: 1px solid #dcdcde;
+	border-left-width: 4px;
+	border-radius: 4px;
+	padding: 12px 16px;
+	margin: 0 0 18px;
+	font-size: 13px;
+	line-height: 1.6;
+	background: #fff;
+}
+
+.tz-callout--ok      { border-left-color: #0f8a4d; background: #f4faf6; }
+.tz-callout--warning { border-left-color: #dba617; background: #fdf9ec; }
+.tz-callout--danger  { border-left-color: #b32d2e; background: #fcf0f1; }
+
+.tz-callout__title {
+	font-weight: 700;
+	margin: 0 0 6px;
+	font-size: 14px;
+}
+
+.tz-callout--danger .tz-callout__title { color: #8a1f1f; }
+.tz-callout--ok .tz-callout__title     { color: #0a6b3c; }
+
+.tz-callout p:last-child { margin-bottom: 0; }
+
+.tz-checklist,
+.tz-steps {
+	margin: 0;
+	padding-left: 20px;
+	font-size: 13px;
+	line-height: 1.7;
+	color: #50575e;
+}
+
+.tz-checklist li,
+.tz-steps li {
+	margin-bottom: 6px;
+}
+
+.tz-code {
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 10px 12px;
+	font-size: 12px;
+	overflow-x: auto;
+	margin: 0 0 12px;
+}
+
+.tz-tags {
+	margin: 0;
+	font-size: 13px;
+}
+
+.tz-tags dt {
+	margin-top: 10px;
+	font-weight: 600;
+}
+
+.tz-tags dt:first-child { margin-top: 0; }
+
+.tz-tags dd {
+	margin: 2px 0 0;
+	color: #646970;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.tz-campaign-list {
+	margin: 0;
+	font-size: 13px;
+}
+
+.tz-campaign-list li {
+	padding: 8px 0;
+	border-bottom: 1px solid #f0f0f1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.tz-campaign-list li:last-child { border-bottom: 0; }
+.tz-campaign-list li.is-current { font-weight: 600; }
+.tz-campaign-list li a { text-decoration: none; flex: 1 1 auto; }
+.tz-campaign-list .tz-muted { flex-basis: 100%; }
+
+.tz-label {
+	display: block;
+	font-weight: 600;
+	font-size: 13px;
+	margin-bottom: 5px;
+}
+
+.tz-button-block {
+	display: block;
+	width: 100%;
+	text-align: center;
+}
+
+.tz-composer__save {
+	margin-top: 16px;
+}
+
+.tz-copy {
+	margin-bottom: 16px;
+}
+
+.tz-copy__label {
+	display: block;
+	font-weight: 600;
+	font-size: 13px;
+	margin-bottom: 5px;
+}
+
+.tz-copy__input {
+	background: #f6f7f7;
+	font-size: 12px;
+}
+
+.tz-reset-label {
+	display: block;
+	background: #fff;
+	border: 2px solid #b32d2e;
+	border-radius: 4px;
+	padding: 12px 14px;
+	font-size: 13px;
+	line-height: 1.6;
+}

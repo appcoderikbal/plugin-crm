@@ -1,0 +1,61 @@
+name: Build plugin release
+
+# Publishing a new version is: bump the Version header, commit, then push a
+# tag like v1.0.1. This workflow packages the plugin and attaches tz-mailer.zip
+# to the release, which is what WordPress downloads when it applies the update.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the tag
+        uses: actions/checkout@v4
+
+      - name: Verify the tag matches the plugin Version header
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER=$(grep -m1 -oP '^\s*\*\s*Version:\s*\K[0-9a-zA-Z.\-]+' tz-mailer.php)
+          echo "tag=$TAG header=$HEADER"
+          if [ "$TAG" != "$HEADER" ]; then
+            echo "::error::Tag $TAG does not match the Version header ($HEADER). Bump the header before tagging."
+            exit 1
+          fi
+
+      - name: Lint every PHP file
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq php-cli
+          find . -name '*.php' -not -path './.git/*' -print0 \
+            | xargs -0 -n1 php -l
+
+      - name: Stage the plugin into a correctly named folder
+        run: |
+          mkdir -p build/tz-mailer
+          rsync -a ./ build/tz-mailer/ \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'build' \
+            --exclude '.gitignore' \
+            --exclude '.distignore'
+
+      - name: Create the zip
+        run: |
+          cd build
+          zip -rq ../tz-mailer.zip tz-mailer
+          cd ..
+          unzip -l tz-mailer.zip | head -20
+
+      - name: Publish the release with the zip attached
+        uses: softprops/action-gh-release@v2
+        with:
+          files: tz-mailer.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false

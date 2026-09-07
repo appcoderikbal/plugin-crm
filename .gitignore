@@ -1,0 +1,14 @@
+# Build output
+/build/
+/tz-mailer.zip
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Dependencies (none shipped, but keep them out if ever added)
+/vendor/
+/node_modules/
