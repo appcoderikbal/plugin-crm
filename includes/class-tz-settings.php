@@ -27,7 +27,7 @@ class TZ_Settings {
 		return array(
 			'aws_access_key'      => '',
 			'aws_secret_key'      => '',
-			'aws_region'          => 'us-east-1',
+			'aws_region'          => 'eu-north-1',
 			'from_name'           => 'Techzapp',
 			'from_email'          => 'updates@updates.techzapp.com',
 			'reply_to_email'      => '',
@@ -86,6 +86,20 @@ class TZ_Settings {
 			'us-gov-east-1'  => 'AWS GovCloud (US-East)',
 			'us-gov-west-1'  => 'AWS GovCloud (US-West)',
 		);
+	}
+
+	/**
+	 * Region used for a fresh install.
+	 *
+	 * Stockholm, because that is where this deployment's SES identity and SNS
+	 * topic live. Getting this wrong is not a harmless default: SES verifies
+	 * identities per region, so sending from the wrong one fails with
+	 * MailFromDomainNotVerified rather than anything self-explanatory.
+	 *
+	 * @return string
+	 */
+	public static function default_region() {
+		return 'eu-north-1';
 	}
 
 	/**
@@ -190,7 +204,7 @@ class TZ_Settings {
 		if ( self::is_valid_region( $region ) ) {
 			$out['aws_region'] = $region;
 		} else {
-			$out['aws_region'] = self::is_valid_region( $current['aws_region'] ) ? $current['aws_region'] : 'us-east-1';
+			$out['aws_region'] = self::is_valid_region( $current['aws_region'] ) ? $current['aws_region'] : self::default_region();
 		}
 
 		// --- Sender identity ---

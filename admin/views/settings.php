@@ -99,6 +99,10 @@ $tz_regions    = TZ_Settings::regions();
 								);
 								?>
 							</p>
+							<p class="description">
+								<strong><?php esc_html_e( 'SES verifies identities per region.', 'tz-mailer' ); ?></strong>
+								<?php esc_html_e( 'A domain verified in one region cannot send from another. Your sending domain, SNS topic and configuration set must all live in the region selected here, or sends fail with MailFromDomainNotVerified and no bounce events ever reach the webhook.', 'tz-mailer' ); ?>
+							</p>
 						</td>
 					</tr>
 					<tr>

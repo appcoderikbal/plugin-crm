@@ -19,6 +19,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
  * @return void
  */
 function tz_mailer_uninstall_site() {
+	return false;
 	global $wpdb;
 
 	$settings = get_option( 'tz_mailer_settings', array() );

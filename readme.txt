@@ -4,7 +4,7 @@ Tags: email, newsletter, aws, ses, bulk email, deliverability, bounce handling
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,14 @@ Only if you tick "Delete all data" in Settings first. Deactivation never
 touches your data.
 
 == Changelog ==
+
+= 1.0.3 =
+* Default region is now Europe (Stockholm), eu-north-1, matching where this
+  deployment's SES identity lives. Only affects fresh installs; an existing
+  configured region is left alone.
+* Settings now warns that SES verifies identities per region, and that the
+  sending domain, SNS topic and configuration set must all live in the
+  selected region.
 
 = 1.0.2 =
 * Added the missing AWS regions. The region list went from 13 entries to 30 and
